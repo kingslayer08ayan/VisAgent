@@ -1,87 +1,81 @@
-VISAGENT
+# VisAgent
 
-OVERVIEW
---------
-VisAgent is an advanced multi-modal AI agent that integrates vision, retrieval-augmented generation (RAG),
-and large language model (LLM) capabilities. It supports intelligent document ingestion, image understanding,
-and context-aware question answering for research, enterprise knowledge bases, and personal assistant applications.
+## Overview
 
-FEATURES
---------
-- Multi-Modal Ingestion: Upload and process PDFs, images, and text files
-- Vision Understanding: Analyze and interpret images
-- RAG-Based Retrieval: Efficiently retrieve relevant information from a local vector store
-- LLM Integration: Generate context-aware responses using GroqLLM
-- FastAPI Backend: Lightweight and scalable API
+VisAgent is an advanced multi-modal AI agent integrating vision, RAG, and LLM capabilities. It supports document ingestion, image understanding, and context-aware question answering.
 
-ARCHITECTURE
-------------
-- RAGStore: Manages document ingestion and retrieval
-- Vision Module: Processes and understands visual inputs
-- GroqLLM: Provides advanced language understanding and generation
-- StateGraph: Orchestrates workflow between components
+## Features
 
-INSTALLATION
-------------
-Prerequisites:
-  - Python 3.10+
-  - Conda (optional for environment management)
+* Multi-Modal Ingestion: PDFs, images, text
+* Vision Understanding
+* RAG-Based Retrieval
+* LLM Integration with GroqLLM
+* FastAPI Backend
 
-Steps:
-1. Clone the repository:
-   git clone https://github.com/kingslayer08ayan/VisAgent.git
-   cd VisAgent
+## Architecture
 
-2. Create and activate a virtual environment:
-   conda create -n visagent python=3.10
-   conda activate visagent
+* **RAGStore**: Document ingestion & retrieval
+* **Vision Module**: Image processing
+* **GroqLLM**: Language understanding & generation
+* **StateGraph**: Workflow orchestration
 
-3. Install dependencies:
-   pip install -r requirements.txt
+## Installation
 
-4. Download required models to ./models/:
-   - all-MiniLM-L6-v2 (for embeddings)
-   - GroqLLM weights (for language processing)
+```bash
+git clone https://github.com/kingslayer08ayan/VisAgent.git
+cd VisAgent
+conda create -n visagent python=3.10
+conda activate visagent
+pip install -r requirements.txt
+```
 
-USAGE
------
-Start the FastAPI server:
-  uvicorn main:app --reload --port 8000
+Download required models to `./models/`:
 
-API Endpoints:
-  POST /ingest : Upload a document (PDF, TXT, or image) for processing
-  POST /ask    : Submit a question or image to receive an intelligent response
+* all-MiniLM-L6-v2
+* GroqLLM weights
 
-PROJECT STRUCTURE
------------------
+## Usage
+
+Start the server:
+
+```bash
+uvicorn main:app --reload --port 8000
+```
+
+Endpoints:
+
+* `POST /ingest`: Upload document for processing
+* `POST /ask`: Submit a question or image
+
+## Project Structure
+
+```
 VisAgent/
-  src/            Core source code
-    llms/         LLM wrappers (e.g., GroqLLM)
-    nodes/        Vision, RAG, and response nodes
-    graphs/       GraphBuilder for agent orchestration
-    utils/        Utility functions
-  models/         Pre-trained models and weights
-  assets/         Project assets (logos, diagrams)
-  main.py         FastAPI application entry point
-  requirements.txt Python dependencies
-  README.txt      Project documentation
+├─ src/
+│  ├─ llms/
+│  ├─ nodes/
+│  ├─ graphs/
+│  └─ utils/
+├─ models/
+├─ main.py
+├─ requirements.txt
+└─ README.md
+```
 
-CONTRIBUTING
-------------
-1. Fork the repository
-2. Create a feature branch:
-   git checkout -b feature/YourFeature
-3. Commit your changes:
-   git commit -m "Add new feature"
-4. Push to the branch:
-   git push origin feature/YourFeature
-5. Open a pull request
+## Contributing
 
-LICENSE
--------
+1. Fork the repo
+2. Create feature branch
+3. Commit changes
+4. Push branch
+5. Open PR
+
+## License
+
 MIT License
 
-CONTACT
--------
-GitHub: https://github.com/kingslayer08ayan
-Email: your.email@example.com
+## Contact
+GitHub: kingslayer08ayan 
+Email: ayanmaity874@gmail.com
+GitHub: [kingslayer08ayan](https://github.com/kingslayer08ayan)
+Email: [your.email@example.com](mailto:your.email@example.com)
