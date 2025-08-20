@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  backend:
+    build: .
+    env_file: .env
+    ports: ["8000:8000"]
+    volumes: [".:/app"]
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    volumes:
+      - ./chroma:/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
