@@ -1,109 +1,103 @@
 VisAgent
+========
 
-VisAgent is a multi-modal AI agent that integrates text, PDF, and image ingestion with retrieval-augmented generation (RAG) and vision-based reasoning, powered by GroqLLM. It provides an end-to-end framework for querying documents, analyzing images, and generating intelligent responses.
+VisAgent is an advanced multi-modal AI agent that integrates vision, retrieval-augmented generation (RAG), 
+and large language model (LLM) capabilities. It allows intelligent document ingestion, image understanding, 
+and context-aware question answering for research, enterprise knowledge bases, and personal assistant applications.
 
-Features:
+Features
+--------
 
-* Text and PDF ingestion into a vector store (Chroma DB) for fast retrieval.
-* Vision processing for image understanding and captioning.
-* Retrieval-Augmented Generation (RAG) for context-aware answers.
-* LLM integration with GroqLLM for reasoning and response generation.
-* Async API using FastAPI for ingestion and querying.
+- Multi-Modal Ingestion: Upload and process PDFs, images, and text files.
+- Vision Understanding: Analyze and interpret images using state-of-the-art vision models.
+- RAG-Based Retrieval: Efficiently retrieve relevant information from a local vector store.
+- LLM Integration: Generate context-aware responses using GroqLLM.
+- FastAPI Backend: Lightweight and scalable API for integration.
 
-Project Structure:
+Architecture
+------------
 
-* main.py                 # FastAPI server entrypoint
-* requirements.txt        # Python dependencies
-* .gitignore
-* README.md
-* src/
+VisAgent's architecture is modular and extensible:
 
-  * nodes/               # RAG, Vision, and Response nodes
-  * rag\_node.py
-  * vision\_node.py
-  * response\_node.py
-  * llms/                # LLM wrappers (GroqLLM)
-  * utils/               # File loaders, logging, helpers
-  * graphs/              # GraphBuilder for AI workflow
-* models/                 # Pretrained models
-* data/                   # Optional: local storage for uploads
+- RAGStore: Manages document ingestion and retrieval.
+- Vision Module: Processes and understands visual inputs.
+- GroqLLM: Provides advanced language understanding and generation.
+- StateGraph: Orchestrates workflow between components.
 
-Installation:
+Installation
+------------
 
-1. Clone the repository
-   git clone [https://github.com/YourUsername/VisAgent.git](https://github.com/YourUsername/VisAgent.git)
+Prerequisites:
+- Python 3.10+
+- Conda (for environment management)
+
+Setup:
+
+1. Clone the repository:
+   git clone https://github.com/kingslayer08ayan/VisAgent.git
    cd VisAgent
 
-2. Create a virtual environment and activate
-   python -m venv .venv
+2. Create and activate a virtual environment(can also be done using UV package manager):
+   - Using Conda
+   conda create -n visagent python=3.10
+   conda activate visagent
+     
 
-   # Windows
-
-   .venv\Scripts\activate
-
-   # Linux/Mac
-
-   source .venv/bin/activate
-
-3. Install dependencies
+4. Install dependencies:
    pip install -r requirements.txt
 
-4. Download or place pretrained models in 'models/' (e.g., 'all-MiniLM-L6-v2').
+5. Download necessary models to ./models/
+   - all-MiniLM-L6-v2 (for embeddings)
+   - GroqLLM weights (for language processing)
+   - create your own API_KEY if you dont have one
 
-Running the Server:
+Usage
+-----
 
-* Start the FastAPI server:
-  uvicorn main\:app --reload --port 8000
+Start the FastAPI server:
 
-Endpoints:
+uvicorn main:app --reload --port 8000
 
-* POST /ingest — Upload a PDF, TXT, or image for ingestion.
-* POST /ask — Query the AI agent with text or image.
+API Endpoints:
 
-Usage Example:
+- POST /ingest : Upload a document (PDF, TXT, or image) for processing.
+- POST /ask    : Submit a question or image to receive an intelligent response.
 
-* Ingest a PDF:
-  from src.visagent.file\_ingest import ingest\_file
-  from src.rag\_node import RAGStore
+Project Structure
+-----------------
 
-  store = RAGStore(collection="visagent")
-  metadata = {"uploaded\_by": "user\_1"}
+VisAgent/
+├── src/            # Core source code
+│   ├── llms/       # LLM wrappers (e.g., GroqLLM)
+│   ├── nodes/      # Vision, RAG, and response nodes
+│   ├── graphs/     # GraphBuilder for agent orchestration
+│   ├── utils/      # Utility functions and helpers
+├── models/         # Pre-trained models and weights
+├── assets/         # Project assets (logos, diagrams) not integrated till now
+├── main.py         # FastAPI application entry point
+├── requirements.txt# Python dependencies
+└── README.txt      # Project documentation
 
-  with open("example.pdf", "rb") as f:
-  file\_bytes = f.read()
+Contributing
+------------
 
-  ingest\_file(file\_bytes, "example.pdf", metadata, store)
+1. Fork the repository.
+2. Create a feature branch:
+   git checkout -b feature/YourFeature
+3. Commit your changes:
+   git commit -m 'Add new feature'
+4. Push to the branch:
+   git push origin feature/YourFeature
+5. Open a pull request describing your changes.
 
-* Ask a question:
-  import requests
+License
+-------
 
-  response = requests.post(
-  "[http://127.0.0.1:8000/ask](http://127.0.0.1:8000/ask)",
-  json={"query": "Summarize the uploaded document"}
-  )
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-  print(response.json())
-
-Tech Stack:
-
-* Python 3.10+
-* FastAPI — Async API server
-* LangGraph — Graph-based AI workflow
-* Chroma DB — Vector database for RAG
-* GroqLLM — Large language model backend
-* Transformers — Pretrained embeddings
-* PyPDF2 / Pillow — PDF and image processing
-
-License:
-
-* MIT License
-
-Notes:
-
-* Ensure your GroqLLM service is running or accessible; errors like '503 Service Unavailable' may occur during high load.
-* Recommended to use a GPU for faster LLM inference if available.
-* Keep 'models/' and 'data/' directories backed up if the project is restarted.
-
-Author:
-
-* Ayan Maity — M.Tech Student, CSE, IIT Kharagpur
+Contact
+-------
+- GitHub: https://github.com/kingslayer08ayan
+- Email: ayanmaity874@gmail.com
+- GitHub: https://github.com/kingslayer08ayan
+- Email: your.email@example.com
