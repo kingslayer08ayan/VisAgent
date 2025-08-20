@@ -61,6 +61,11 @@ VisAgent/
 ├─ requirements.txt
 └─ README.md
 ```
+## Demo
+
+Here’s a quick demo of **VisAgent** in action:
+
+![VisAgent Demo](docs/demo.gif)
 
 ## Contributing
 
@@ -79,3 +84,4 @@ GitHub: kingslayer08ayan
 Email: ayanmaity874@gmail.com
 GitHub: [kingslayer08ayan](https://github.com/kingslayer08ayan)
 Email: [your.email@example.com](mailto:your.email@example.com)
+
