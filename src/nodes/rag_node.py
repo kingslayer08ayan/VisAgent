@@ -3,13 +3,10 @@ from uuid import uuid4
 import os
 import chromadb
 from src.utils.config import CHROMA_PATH
-from src.utils.file_loader import (
-    chunk_text,
-    read_pdf_bytes_stream,
-    read_text_file_bytes_stream
-)
+from src.utils.file_loader import read_pdf_bytes_stream, read_text_file_bytes_stream
 from src.utils.logging import get_logger
 from sentence_transformers import SentenceTransformer
+import torch
 
 logger = get_logger("RAG")
 
@@ -18,27 +15,43 @@ class RAGStore:
         self.client = chromadb.PersistentClient(path=CHROMA_PATH)
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         model_dir = os.path.join(BASE_DIR, "..", "..", "models", "all-MiniLM-L6-v2")
-        logger.info(f"Loading local embedder from {model_dir} on CPU")
-        self.embedder = SentenceTransformer(model_dir, device="cpu")
 
-        self.col = self.client.get_or_create_collection(name=collection)
+        # Auto-detect device
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info(f"Loading local embedder from {model_dir} on {self.device.upper()}")
+        self.embedder = SentenceTransformer(model_dir, device=self.device)
+
+        self.collection_name = collection
+        self.col = self.client.get_or_create_collection(name=self.collection_name)
         logger.info(f"Chroma collection ready @ {CHROMA_PATH}")
+
+    def clear_collection(self):
+        logger.info(f"Clearing all documents in collection: {self.collection_name}")
+        # Get all IDs
+        all_docs = self.col.get()
+        ids_to_delete = all_docs.get("ids", [])
+        if ids_to_delete:
+            self.col.delete(ids=ids_to_delete)
+            logger.info(f"Deleted {len(ids_to_delete)} documents")
+        else:
+            logger.info("Collection already empty")
+
+
+
 
     def add_document_stream(
         self,
         file_bytes: bytes,
         meta: Dict,
         file_type: str = "pdf",
-        batch_size: int = 64
+        batch_size: int = 64,
+        clear_existing: bool = False
     ) -> int:
-        """
-        Memory-safe ingestion from raw file bytes.
-        Supports 'pdf' or 'txt'.
-        """
-        if file_type.lower() == "pdf":
-            chunk_iter = read_pdf_bytes_stream(file_bytes)
-        else:
-            chunk_iter = read_text_file_bytes_stream(file_bytes)
+        """Ingest PDF or TXT in memory-safe batches."""
+        if clear_existing:
+            self.clear_collection()
+
+        chunk_iter = read_pdf_bytes_stream(file_bytes) if file_type.lower() == "pdf" else read_text_file_bytes_stream(file_bytes)
 
         total_chunks = 0
         batch, ids_batch = [], []
@@ -52,7 +65,7 @@ class RAGStore:
                 embeddings = self.embedder.encode(batch, convert_to_numpy=True, normalize_embeddings=True)
                 self.col.add(
                     documents=batch,
-                    metadatas=[meta]*len(batch),
+                    metadatas=[meta] * len(batch),
                     ids=ids_batch,
                     embeddings=embeddings.tolist()
                 )
@@ -60,12 +73,11 @@ class RAGStore:
                 batch, ids_batch = [], []
                 logger.info(f"Ingested {total_chunks} chunks so far")
 
-        # Add any remaining chunks
         if batch:
             embeddings = self.embedder.encode(batch, convert_to_numpy=True, normalize_embeddings=True)
             self.col.add(
                 documents=batch,
-                metadatas=[meta]*len(batch),
+                metadatas=[meta] * len(batch),
                 ids=ids_batch,
                 embeddings=embeddings.tolist()
             )
@@ -75,6 +87,11 @@ class RAGStore:
         return total_chunks
 
     def query(self, q: str, k: int = 5) -> Dict:
+        """Query top-k similar chunks."""
+        # Ensure collection object exists
+        if self.col is None:
+            self.col = self.client.get_or_create_collection(name=self.collection_name)
+
         q_embedding = self.embedder.encode([q], convert_to_numpy=True, normalize_embeddings=True)[0]
         res = self.col.query(query_embeddings=[q_embedding], n_results=k)
 
@@ -85,18 +102,18 @@ class RAGStore:
 
 
 def rag_node(state: Dict, store: RAGStore, top_k: int = 5) -> Dict:
-    """
-    Memory-safe retrieval node. 
-    Retrieves top_k docs and only keeps what's needed in state.
-    """
+    """Retrieve top-k documents from RAGStore for the given query."""
     q = state.get("query", "")
     if not q:
         state["retrieved_docs"] = []
         state["sources"] = []
         return state
 
+    # Ensure collection object exists before querying
+    if store.col is None:
+        store.col = store.client.get_or_create_collection(name=store.collection_name)
+
     result = store.query(q, k=top_k)
-    # Only keep top_k documents and their metadata
     state["retrieved_docs"] = result.get("documents", [])[:top_k]
     state["sources"] = result.get("metadatas", [])[:top_k]
     return state
